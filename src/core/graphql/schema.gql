@@ -26,6 +26,7 @@ type Mutation {
 
 type Query {
   findAllUsers: [UserModel!]!
+  findProfile: UserModel!
 }
 
 enum Role {
