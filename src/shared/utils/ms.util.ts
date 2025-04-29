@@ -53,7 +53,7 @@ export function ms(str: StringValue): number {
   }
 
   const match =
-    /^(?:<value>-?(?:\d+)?\.?\d+)(?:<type>milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+    /^(?<value>-?(?:\d+)?\.?\d+) *(?<type>milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
       str,
     );
 
@@ -69,6 +69,7 @@ export function ms(str: StringValue): number {
   }
 
   const n = parseFloat(groups.value);
+
   const type = (groups.type ?? 'ms').toLowerCase() as Lowercase<Unit>;
 
   switch (type) {
