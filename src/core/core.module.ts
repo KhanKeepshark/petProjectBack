@@ -9,6 +9,7 @@ import { getGraphqlConfig } from './config/graphql.config';
 import { RedisModule } from './redis/redis.module';
 import { AccountModule } from '../modules/auth/account/account.module';
 import { SessionModule } from '../modules/auth/session/session.module';
+import { TotpModule } from '../modules/auth/totp/totp.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { SessionModule } from '../modules/auth/session/session.module';
     RedisModule,
     AccountModule,
     SessionModule,
+    TotpModule,
   ],
 })
 export class CoreModule {}

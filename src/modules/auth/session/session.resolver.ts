@@ -1,12 +1,11 @@
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { SessionService } from './session.service';
-import { UserModel } from '../account/models/user.model';
 import { LoginInput } from './inputs/login.inputs';
 import { GqlContext } from '@/src/shared/types/gql-context.types';
 import { UserAgent } from '@/src/shared/decorators/user-agent.decorator';
 import { Authorization } from '@/src/shared/decorators/auth.decorator';
 import { SessionModel } from './models/session.model';
-
+import { AuthModel } from '../account/models/auth.model';
 @Resolver('Session')
 export class SessionResolver {
   constructor(private readonly sessionService: SessionService) {}
@@ -23,7 +22,7 @@ export class SessionResolver {
     return await this.sessionService.findCurrentSession(req);
   }
 
-  @Mutation(() => UserModel, { name: 'loginUser' })
+  @Mutation(() => AuthModel, { name: 'loginUser' })
   public async login(
     @Context() { req }: GqlContext,
     @Args('data') input: LoginInput,

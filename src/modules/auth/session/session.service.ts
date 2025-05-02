@@ -1,8 +1,8 @@
 import { PrismaService } from '@/src/core/prisma/prisma.service';
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -12,6 +12,8 @@ import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { getSessionMetadata } from '@/src/shared/utils/session-metadata.util';
 import { RedisService } from '@/src/core/redis/redis.service';
+import { TOTP } from 'otpauth';
+import { clearSession, saveSession } from '@/src/shared/utils/session.util';
 @Injectable()
 export class SessionService {
   public constructor(
@@ -53,7 +55,7 @@ export class SessionService {
   }
 
   public async login(req: Request, input: LoginInput, userAgent: string) {
-    const { login, password } = input;
+    const { login, password, pin } = input;
 
     const user = await this.prismaService.user.findFirst({
       where: {
@@ -71,40 +73,35 @@ export class SessionService {
       throw new UnauthorizedException('Invalid password');
     }
 
+    if (user.isTotpEnabled) {
+      if (!pin) {
+        return {
+          message: 'pin is requred',
+        };
+      }
+
+      const totp = new TOTP({
+        issuer: 'TopicChat',
+        label: user.email,
+        algorithm: 'SHA1',
+        digits: 6,
+        secret: user.totpSecret,
+      });
+
+      const delta = totp.validate({ token: pin });
+
+      if (delta === null) {
+        throw new BadRequestException('Invalid TOTP code');
+      }
+    }
+
     const metadata = getSessionMetadata(req, userAgent);
 
-    return new Promise((resolve, reject) => {
-      req.session.userId = user.id;
-      req.session.createdAt = new Date();
-      req.session.metadata = metadata;
-
-      req.session.save((err) => {
-        if (err) {
-          return reject(
-            new InternalServerErrorException('Failed to save session'),
-          );
-        }
-
-        resolve(user);
-      });
-    });
+    return await saveSession(req, user, metadata);
   }
 
   public async logout(req: Request) {
-    return new Promise((resolve, reject) => {
-      req.session.destroy((err) => {
-        if (err) {
-          return reject(
-            new InternalServerErrorException('Failed to destroy session'),
-          );
-        }
-
-        req.res.clearCookie(
-          this.configService.getOrThrow<string>('SESSION_NAME'),
-        );
-        resolve(true);
-      });
-    });
+    return clearSession(req, this.configService);
   }
 
   public async clearSessionCookie(req: Request) {

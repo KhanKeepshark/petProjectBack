@@ -9,11 +9,15 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String   @unique
-  avatar    String?
+  id       String  @id @default(uuid())
+  email    String  @unique
+  password String
+  name     String  @unique
+  avatar   String?
+
+  isTotpEnabled Boolean @default(false)
+  totpSecret    String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   role      Role     @default(USER)

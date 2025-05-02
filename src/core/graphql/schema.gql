@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AuthModel {
+  message: String
+  user: UserModel
+}
+
 input CreateUserInput {
   email: String!
   name: String!
@@ -19,6 +24,11 @@ type DeviceModel {
   type: String!
 }
 
+input EnableTotpInput {
+  pin: String!
+  secret: String!
+}
+
 type LocationModel {
   city: String!
   country: String!
@@ -29,12 +39,15 @@ type LocationModel {
 input LoginInput {
   login: String!
   password: String!
+  pin: String
 }
 
 type Mutation {
   clearSessionCookie: Boolean!
   createUser(data: CreateUserInput!): UserModel!
-  loginUser(data: LoginInput!): UserModel!
+  disableTotp: Boolean!
+  enableTotp(input: EnableTotpInput!): Boolean!
+  loginUser(data: LoginInput!): AuthModel!
   logoutUser: Boolean!
   removeSession(id: String!): Boolean!
 }
@@ -44,6 +57,7 @@ type Query {
   findCurrentSession: SessionModel!
   findProfile: UserModel!
   findSessionsByUser: [SessionModel!]!
+  generateTotpSecret: TotpModel!
 }
 
 enum Role {
@@ -64,13 +78,20 @@ type SessionModel {
   userId: String!
 }
 
+type TotpModel {
+  qrCodeUrl: String!
+  secret: String!
+}
+
 type UserModel {
   avatar: String
   createdAt: DateTime!
   email: String!
   id: ID!
+  isTotpEnabled: Boolean!
   name: String!
   password: String!
   role: Role!
+  totpSecret: String
   updatedAt: DateTime!
 }
