@@ -7,6 +7,10 @@ type AuthModel {
   user: UserModel
 }
 
+input ChangeProfileInfoInput {
+  name: String!
+}
+
 input CreateUserInput {
   email: String!
   name: String!
@@ -43,8 +47,11 @@ input LoginInput {
 }
 
 type Mutation {
+  changeProfileAvatar(avatar: Upload!): String!
+  changeProfileInfo(input: ChangeProfileInfoInput!): String!
   clearSessionCookie: Boolean!
   createUser(data: CreateUserInput!): UserModel!
+  deleteProfileAvatar: String!
   disableTotp: Boolean!
   enableTotp(input: EnableTotpInput!): Boolean!
   loginUser(data: LoginInput!): AuthModel!
@@ -82,6 +89,9 @@ type TotpModel {
   qrCodeUrl: String!
   secret: String!
 }
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
 
 type UserModel {
   avatar: String
